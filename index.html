@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scratch Quiz Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4a6fa5;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .level {
+            display: none;
+            padding: 20px;
+            border: 2px solid #4a6fa5;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+        }
+        .level.active {
+            display: block;
+        }
+        .question {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .options {
+            margin-left: 20px;
+        }
+        .option {
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        .option:hover {
+            color: #4a6fa5;
+        }
+        .drag-container {
+            display: flex;
+            margin: 20px 0;
+        }
+        .drag-words {
+            width: 200px;
+            padding: 10px;
+            border: 2px dashed #4a6fa5;
+            border-radius: 5px;
+            margin-right: 20px;
+        }
+        .drag-word {
+            padding: 8px;
+            margin: 5px;
+            background-color: #e0e9fa;
+            border-radius: 4px;
+            cursor: move;
+        }
+        .drag-sentences {
+            flex-grow: 1;
+        }
+        .drag-sentence {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .blank {
+            display: inline-block;
+            width: 150px;
+            height: 30px;
+            border-bottom: 2px solid #4a6fa5;
+            margin: 0 5px;
+            vertical-align: middle;
+        }
+        .fill-blank {
+            margin-bottom: 15px;
+        }
+        .fill-input {
+            padding: 5px;
+            border: 1px solid #4a6fa5;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+        button {
+            background-color: #4a6fa5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background-color: #3a5a8f;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .completion-message {
+            color: #721c24;
+            font-weight: bold;
+            display: none;
+            margin-bottom: 10px;
+        }
+        .final-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .final-buttons button {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Scratch Knowledge Quiz</h1>
+        
+        <div class="level active" id="level1">
+            <div class="question">
+                <p>Καλώς ήρθες στο παιχνίδι! Ξεκίνα εδώ για να πλοηγηθείς στο παιχνίδι. Πρέπει να λύσεις διαφορετικές ασκήσεις για να ολοκληρώσεις όλα τα επίπεδα!</p>
+            </div>
+            <div class="navigation">
+                <button onclick="nextLevel()">Έναρξη</button>
+            </div>
+        </div>
+        
+        <div class="level" id="level2">
+            <div class="question">
+                <p>1. Τι είναι το Scratch;</p>
+                <div class="options">
+                    <div class="option" onclick="checkAnswer(this, 'γ')">α) Ένα πρόγραμμα ζωγραφικής</div>
+                    <div class="option" onclick="checkAnswer(this, 'γ')">β) Ένα πρόγραμμα δημιουργίας ιστοσελίδων</div>
+                    <div class="option" onclick="checkAnswer(this, 'γ')">γ) Ένα περιβάλλον προγραμματισμού με μπλοκ</div>
+                    <div class="option" onclick="checkAnswer(this, 'γ')">δ) Ένα πρόγραμμα επεξεργασίας κειμένου</div>
+                </div>
+                <div class="feedback"></div>
+            </div>
+            <div class="navigation">
+                <button onclick="prevLevel()">Πίσω</button>
+                <button onclick="nextLevel()">Επόμενο</button>
+            </div>
+            <div class="completion-message">Πρέπει να απαντήσεις στην ερώτηση πριν προχωρήσεις!</div>
+        </div>
+        
+        <div class="level" id="level3">
+            <div class="question">
+                <p>Σύρε τις λέξεις από το πλαίσιο και τοποθέτησέ τες στο σωστό κενό στην κάθε πρόταση!</p>
+                <div class="drag-container">
+                    <div class="drag-words" id="word-bank">
+                        <div class="drag-word" draggable="true" data-word="α) πράσινη">α) πράσινη</div>
+                        <div class="drag-word" draggable="true" data-word="β) αντικείμενα (sprites)">β) αντικείμενα (sprites)</div>
+                        <div class="drag-word" draggable="true" data-word="γ) Σταμάτα">γ) Σταμάτα</div>
+                        <div class="drag-word" draggable="true" data-word="δ) σκηνή">δ) σκηνή</div>
+                        <div class="drag-word" draggable="true" data-word="ε) πράσινη σημαία">ε) πράσινη σημαία</div>
+                    </div>
+                    <div class="drag-sentences">
+                        <div class="drag-sentence" data-answer="β) αντικείμενα (sprites)">
+                            1) Τα <span class="blank" ondrop="drop(event)" ondragover="allowDrop(event)"></span> στο Scratch είναι οι χαρακτήρες ή αντικείμενα που κινούνται και αλληλεπιδρούν.
+                        </div>
+                        <div class="drag-sentence" data-answer="α) πράσινη">
+                            2) Ένα πρόγραμμα στο Scratch ξεκινά με το μπλοκ "Όταν γίνει κλικ στην <span class="blank" ondrop="drop(event)" ondragover="allowDrop(event)"></span> σημαία".
+                        </div>
+                        <div class="drag-sentence" data-answer="γ) Σταμάτα">
+                            3) Η εντολή "<span class="blank" ondrop="drop(event)" ondragover="allowDrop(event)"></span> όλα" χρησιμοποιείται για να σταματήσουν όλα τα σενάρια στο έργο.
+                        </div>
+                        <div class="drag-sentence" data-answer="δ) σκηνή">
+                            4) Η <span class="blank" ondrop="drop(event)" ondragover="allowDrop(event)"></span> είναι το σημείο στην οθόνη όπου εμφανίζονται τα αντικείμενα και εκτελούνται τα σενάρια.
+                        </div>
+                        <div class="drag-sentence" data-answer="ε) πράσινη σημαία">
+                            5) Για να ξεκινήσει ένα παιχνίδι στο Scratch, πρέπει να πατηθεί η <span class="blank" ondrop="drop(event)" ondragover="allowDrop(event)"></span>.
+                        </div>
+                    </div>
+                </div>
+                <div class="feedback"></div>
+            </div>
+            <div class="navigation">
+                <button onclick="prevLevel()">Πίσω</button>
+                <button onclick="nextLevel()">Επόμενο</button>
+            </div>
+            <div class="completion-message">Πρέπει να συμπληρώσεις όλα τα κενά πριν προχωρήσεις!</div>
+        </div>
+        
+        <div class="level" id="level4">
+            <div class="question">
+                <p>Απάντησε Σωστό ή Λάθος στις παρακάτω προτάσεις:</p>
+                <div class="options">
+                    <div class="question" data-correct="α">
+                        <p>1) Η σκηνή στο Scratch είναι το σημείο όπου "παίζουν" τα αντικείμενα.</p>
+                        <div class="options">
+                            <div class="option" onclick="checkTrueFalse(this, 'α')">α) Σωστό</div>
+                            <div class="option" onclick="checkTrueFalse(this, 'α')">β) Λάθος</div>
+                        </div>
+                        <div class="feedback"></div>
+                    </div>
+                    <div class="question" data-correct="α">
+                        <p>2) Μπορούμε να δημιουργήσουμε δικά μας μπλοκ εντολών στο Scratch.</p>
+                        <div class="options">
+                            <div class="option" onclick="checkTrueFalse(this, 'α')">α) Σωστό</div>
+                            <div class="option" onclick="checkTrueFalse(this, 'α')">β) Λάθος</div>
+                        </div>
+                        <div class="feedback"></div>
+                    </div>
+                    <div class="question" data-correct="β">
+                        <p>3) Τα προγράμματα στο Scratch δεν μπορούν να περιέχουν ήχο.</p>
+                        <div class="options">
+                            <div class="option" onclick="checkTrueFalse(this, 'β')">α) Σωστό</div>
+                            <div class="option" onclick="checkTrueFalse(this, 'β')">β) Λάθος</div>
+                        </div>
+                        <div class="feedback"></div>
+                    </div>
+                    <div class="question" data-correct="α">
+                        <p>4) Κάθε αντικείμενο στο Scratch έχει το δικό του σενάριο (script).</p>
+                        <div class="options">
+                            <div class="option" onclick="checkTrueFalse(this, 'α')">α) Σωστό</div>
+                            <div class="option" onclick="checkTrueFalse(this, 'α')">β) Λάθος</div>
+                        </div>
+                        <div class="feedback"></div>
+                    </div>
+                    <div class="question" data-correct="α">
+                        <p>5) Η πράσινη σημαία ξεκινά το πρόγραμμα και το κόκκινο κουμπί το σταματά.</p>
+                        <div class="options">
+                            <div class="option" onclick="checkTrueFalse(this, 'α')">α) Σωστό</div>
+                            <div class="option" onclick="checkTrueFalse(this, 'α')">β) Λάθος</div>
+                        </div>
+                        <div class="feedback"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button onclick="prevLevel()">Πίσω</button>
+                <button onclick="nextLevel()">Επόμενο</button>
+            </div>
+            <div class="completion-message">Πρέπει να απαντήσεις σε όλες τις ερωτήσεις πριν προχωρήσεις!</div>
+        </div>
+        
+        <div class="level" id="level5">
+            <div class="question">
+                <p>Επέλεξε τη σωστή απάντηση:</p>
+                <div class="options">
+                    <div class="question">
+                        <p>1) Ποια πρόταση περιγράφει σωστά πως σταματούν όλα τα σενάρια σε ένα έργο στο Scratch;</p>
+                        <div class="options">
+                            <div class="option" onclick="checkAnswer(this, 'δ')">α) Τα σενάρια σταματούν μόνο όταν κλείσουμε τον υπολογιστή.</div>
+                            <div class="option" onclick="checkAnswer(this, 'δ')">β) Τα σενάρια σταματούν αυτόματα μετά από 10 λεπτά.</div>
+                            <div class="option" onclick="checkAnswer(this, 'δ')">γ) Τα σενάρια σταματούν όταν προσθέσουμε ήχο στο αντικείμενο.</div>
+                            <div class="option" onclick="checkAnswer(this, 'δ')">δ) Τα σενάρια σταματούν όταν χρησιμοποιήσουμε την εντολή "Σταμάτα όλα".</div>
+                        </div>
+                        <div class="feedback"></div>
+                    </div>
+                    <div class="question">
+                        <p>2) Ποια από τις παρακάτω προτάσεις ΔΕΝ περιγράφει κάτι που μπορούμε να αλλάξουμε σε ένα αντικείμενο (sprite);</p>
+                        <div class="options">
+                            <div class="option" onclick="checkAnswer(this, 'β')">α) Μπορούμε να αλλάξουμε την ενδυμασία του αντικειμένου.</div>
+                            <div class="option" onclick="checkAnswer(this, 'β')">β) Μπορούμε να αλλάξουμε το όνομα του Scratch μέσα στο αντικείμενο.</div>
+                            <div class="option" onclick="checkAnswer(this, 'β')">γ) Μπορούμε να μετακινήσουμε το αντικείμενο στη σκηνή.</div>
+                            <div class="option" onclick="checkAnswer(this, 'β')">δ) Μπορούμε να προσθέσουμε ήχο στο αντικείμενο.</div>
+                        </div>
+                        <div class="feedback"></div>
+                    </div>
+                    <div class="question">
+                        <p>3) Ποια πρόταση περιγράφει σωστά τι είναι ένα σενάριο (script) στο Scratch;</p>
+                        <div class="options">
+                            <div class="option" onclick="checkAnswer(this, 'β')">α) Ένα σενάριο είναι μια εντολή που αλλάζει το χρώμα του σκηνικού.</div>
+                            <div class="option" onclick="checkAnswer(this, 'β')">β) Ένα σενάριο είναι μια σειρά από μπλοκ εντολών που λέει στο αντικείμενο τι να κάνει.</div>
+                            <div class="option" onclick="checkAnswer(this, 'β')">γ) Ένα σενάριο είναι το όνομα του έργου στο Scratch.</div>
+                            <div class="option" onclick="checkAnswer(this, 'β')">δ) Ένα σενάριο είναι το κείμενο των διαλόγων των ηρώων.</div>
+                        </div>
+                        <div class="feedback"></div>
+                    </div>
+                    <div class="question">
+                        <p>4) Ποια από τις παρακάτω προτάσεις εξηγεί σωστά γιατί είναι χρήσιμο το Scratch στην εκμάθηση προγραμματισμού;</p>
+                        <div class="options">
+                            <div class="option" onclick="checkAnswer(this, 'γ')">α) Είναι χρήσιμο επειδή μας μαθαίνει να γράφουμε κώδικα μόνο σε επαγγελματικό επίπεδο.</div>
+                            <div class="option" onclick="checkAnswer(this, 'γ')">β) Είναι χρήσιμο επειδή χρησιμοποιούμε μόνο εικόνες και καθόλου λογική.</div>
+                            <div class="option" onclick="checkAnswer(this, 'γ')">γ) Είναι χρήσιμο επειδή είναι εύκολο στη χρήση και βοηθά στην κατανόηση βασικών εννοιών προγραμματισμού.</div>
+                            <div class="option" onclick="checkAnswer(this, 'γ')">δ) Είναι χρήσιμο επειδή επιτρέπει την κατασκευή παιχνιδιών χωρίς κανόνες.</div>
+                        </div>
+                        <div class="feedback"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="navigation">
+                <button onclick="prevLevel()">Πίσω</button>
+                <button onclick="nextLevel()">Επόμενο</button>
+            </div>
+            <div class="completion-message">Πρέπει να απαντήσεις σε όλες τις ερωτήσεις πριν προχωρήσεις!</div>
+        </div>
+        
+        <div class="level" id="level6">
+            <div class="question">
+                <p>Συμπλήρωσε τα κενά στις παρακάτω προτάσεις:</p>
+                <div class="fill-blank">
+                    <p>1) Στο Scratch, το πρόγραμμα εκτελείται όταν τα μπλοκ εντολών είναι σωστά <input type="text" class="fill-input" data-answer="συνδεδεμένα"> στην περιοχή του αντικειμένου (sprite).</p>
+                </div>
+                <div class="fill-blank">
+                    <p>2) Για να αλλάξουμε την εμφάνιση ενός αντικειμένου (sprite), μπορούμε να του προσθέσουμε ή να το <input type="text" class="fill-input" data-answer="αλλάξουμε"> σε μια νέα ενδυμασία.</p>
+                </div>
+                <div class="fill-blank">
+                    <p>3) Αν θέλουμε να επαναλάβουμε μια ενέργεια για πάντα στο Scratch, χρησιμοποιούμε το μπλοκ <input type="text" class="fill-input" data-answer="επανάλαβε"> για πάντα.</p>
+                </div>
+                <div class="fill-blank">
+                    <p>4) Στο Scratch, κάθε μπλοκ εντολών έχει μια συγκεκριμένη <input type="text" class="fill-input" data-answer="λειτουργία"> που καθορίζει τι πρέπει να κάνει.</p>
+                </div>
+                <div class="fill-blank">
+                    <p>5) Μπορούμε να δημιουργήσουμε νέα μπλοκ στο Scratch χρησιμοποιώντας την επιλογή <input type="text" class="fill-input" data-answer="ορισμός"> μπλοκ.</p>
+                </div>
+                <div class="fill-blank">
+                    <p>6) Για να μετακινήσουμε το αντικείμενο (sprite) σε άλλη θέση στη σκηνή, χρησιμοποιούμε την εντολή <input type="text" class="fill-input" data-answer="πήγαινε"> στην θέση x: y:.</p>
+                </div>
+                <div class="fill-blank">
+                    <p>7) Η εντολή <input type="text" class="fill-input" data-answer="Σταμάτα"> όλα χρησιμοποιείται για να σταματήσουν όλα τα σενάρια σε ένα έργο ταυτόχρονα.</p>
+                </div>
+                <div class="feedback"></div>
+            </div>
+            <div class="navigation">
+                <button onclick="prevLevel()">Πίσω</button>
+                <button onclick="nextLevel()">Επόμενο</button>
+            </div>
+            <div class="completion-message">Πρέπει να συμπληρώσεις όλα τα κενά πριν προχωρήσεις!</div>
+        </div>
+        
+        <div class="level" id="level7">
+            <div class="question">
+                <p>Ολοκληρώσατε την δραστηριότητα;</p>
+                <p>Αν ολοκληρώσετε τώρα, δεν θα μπορέσετε να εξερευνήσετε άλλο τη δραστηριότητα. Το σκορ σας θα υποβληθεί. Θέλετε πραγματικά να ολοκληρώσετε την δραστηριότητα;</p>
+            </div>
+            <div class="final-buttons">
+                <button onclick="finishQuiz(true)">Ναι</button>
+                <button onclick="finishQuiz(false)">Όχι</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLevel = 1;
+        const totalLevels = 7;
+        
+        // Initialize drag and drop functionality
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+        
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.dataset.word);
+        }
+        
+        function drop(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const blank = ev.target;
+            
+            // Check if the blank is empty or if we're replacing an existing word
+            if (blank.innerHTML === "" || confirm("Θέλετε να αντικαταστήσετε την υπάρχουσα λέξη;")) {
+                blank.innerHTML = data;
+                blank.dataset.filled = "true";
+                blank.style.borderBottom = "none";
+                
+                // Check if all blanks are filled
+                checkDragCompletion();
+            }
+        }
+        
+        function checkDragCompletion() {
+            const blanks = document.querySelectorAll('.blank');
+            let allFilled = true;
+            
+            blanks.forEach(blank => {
+                if (!blank.dataset.filled) {
+                    allFilled = false;
+                }
+            });
+            
+            return allFilled;
+        }
+        
+        // Check answer for multiple choice questions
+        function checkAnswer(element, correctAnswer) {
+            const selectedOption = element.textContent.trim().charAt(0);
+            const feedback = element.closest('.question').querySelector('.feedback');
+            
+            if (selectedOption === correctAnswer) {
+                feedback.textContent = "Σωστή απάντηση!";
+                feedback.className = "feedback correct";
+                element.style.color = "#155724";
+                element.style.fontWeight = "bold";
+            } else {
+                feedback.textContent = "Λάθος απάντηση. Η σωστή απάντηση είναι η " + correctAnswer + ".";
+                feedback.className = "feedback incorrect";
+                element.style.color = "#721c24";
+                
+                // Highlight the correct answer
+                const options = element.closest('.options').querySelectorAll('.option');
+                options.forEach(opt => {
+                    if (opt.textContent.trim().charAt(0) === correctAnswer) {
+                        opt.style.color = "#155724";
+                        opt.style.fontWeight = "bold";
+                    }
+                });
+            }
+            
+            feedback.style.display = "block";
+            
+            // Mark question as answered
+            element.closest('.question').dataset.answered = "true";
+        }
+        
+        // Check answer for true/false questions
+        function checkTrueFalse(element, correctAnswer) {
+            const questionDiv = element.closest('.question');
+            const correctOption = questionDiv.dataset.correct;
+            const feedback = questionDiv.querySelector('.feedback');
+            const selectedOption = element.textContent.trim().charAt(0);
+            
+            // Mark question as answered
+            questionDiv.dataset.answered = "true";
+            
+            if (selectedOption === correctOption) {
+                feedback.textContent = "Σωστή απάντηση!";
+                feedback.className = "feedback correct";
+                element.style.color = "#155724";
+                element.style.fontWeight = "bold";
+            } else {
+                feedback.textContent = `Λάθος απάντηση. Η σωστή απάντηση είναι ${correctOption === 'α' ? "'Σωστό'" : "'Λάθος'"}.`;
+                feedback.className = "feedback incorrect";
+                element.style.color = "#721c24";
+                
+                // Highlight the correct answer
+                const options = questionDiv.querySelectorAll('.option');
+                options.forEach(opt => {
+                    if (opt.textContent.trim().charAt(0) === correctOption) {
+                        opt.style.color = "#155724";
+                        opt.style.fontWeight = "bold";
+                    }
+                });
+            }
+            
+            feedback.style.display = "block";
+        }
+        
+        // Navigation functions
+        function prevLevel() {
+            if (currentLevel > 1) {
+                changeLevel(currentLevel - 1);
+            }
+        }
+        
+        function nextLevel() {
+            // Check if current level is complete before proceeding
+            if (isLevelComplete(currentLevel)) {
+                if (currentLevel < totalLevels) {
+                    changeLevel(currentLevel + 1);
+                }
+            } else {
+                // Show completion message
+                const levelElement = document.getElementById(`level${currentLevel}`);
+                const message = levelElement.querySelector('.completion-message');
+                message.style.display = "block";
+                
+                // Hide message after 3 seconds
+                setTimeout(() => {
+                    message.style.display = "none";
+                }, 3000);
+            }
+        }
+        
+        function isLevelComplete(level) {
+            const levelElement = document.getElementById(`level${level}`);
+            
+            // Level 1 has no questions, always complete
+            if (level === 1) return true;
+            
+            // Level 2 - single multiple choice
+            if (level === 2) {
+                return levelElement.querySelector('.question').dataset.answered === "true";
+            }
+            
+            // Level 3 - drag and drop
+            if (level === 3) {
+                return checkDragCompletion();
+            }
+            
+            // Level 4 - true/false questions
+            if (level === 4) {
+                const questions = levelElement.querySelectorAll('.question > .options > .question');
+                let allAnswered = true;
+                
+                questions.forEach(q => {
+                    if (q.dataset.answered !== "true") {
+                        allAnswered = false;
+                    }
+                });
+                
+                return allAnswered;
+            }
+            
+            // Level 5 - multiple choice questions
+            if (level === 5) {
+                const questions = levelElement.querySelectorAll('.question > .options > .question');
+                let allAnswered = true;
+                
+                questions.forEach(q => {
+                    if (q.dataset.answered !== "true") {
+                        allAnswered = false;
+                    }
+                });
+                
+                return allAnswered;
+            }
+            
+            // Level 6 - fill in the blanks
+            if (level === 6) {
+                const inputs = levelElement.querySelectorAll('.fill-input');
+                let allFilled = true;
+                
+                inputs.forEach(input => {
+                    if (input.value.trim() === "") {
+                        allFilled = false;
+                    }
+                });
+                
+                return allFilled;
+            }
+            
+            // Level 7 is the final level, always complete
+            if (level === 7) return true;
+            
+            return false;
+        }
+        
+        function changeLevel(newLevel) {
+            // Hide current level
+            document.getElementById(`level${currentLevel}`).classList.remove('active');
+            
+            // Show new level
+            document.getElementById(`level${newLevel}`).classList.add('active');
+            
+            // Update current level
+            currentLevel = newLevel;
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+        
+        function finishQuiz(confirm) {
+            if (confirm) {
+                alert("Η δραστηριότητα ολοκληρώθηκε! Ευχαριστούμε για τη συμμετοχή σας.");
+                // Here you would typically submit the results to a server
+            } else {
+                // Go back to level 1
+                changeLevel(1);
+            }
+        }
+        
+        // Initialize drag and drop words
+        const words = document.querySelectorAll('.drag-word');
+        words.forEach(word => {
+            word.addEventListener('dragstart', drag);
+        });
+        
+        // Initialize fill in the blank inputs to check for completion
+        const fillInputs = document.querySelectorAll('.fill-input');
+        fillInputs.forEach(input => {
+            input.addEventListener('input', () => {
+                if (input.value.trim() !== "") {
+                    input.style.borderColor = "#4a6fa5";
+                } else {
+                    input.style.borderColor = "#721c24";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
